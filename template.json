@@ -1,0 +1,65 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "ListEC2Role": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "RoleName": "ListEC2Role",
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "Policies": [ 
+                    {
+                        "PolicyName": "ListEC2Policy",
+                        "PolicyDocument": {
+                            "Version" : "2012-10-17",
+                            "Statement": [ 
+                                {
+                                    "Effect": "Allow",
+                                    "Action": "ec2:DescribeInstances",
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": "ec2:DescribeRegions",
+                                    "Resource": "*"
+                                }
+                            ]
+                       }
+                    } 
+                ]
+            }
+        },
+        "ListEC2": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "FunctionName": "ListEC2Function",
+                "Code": {
+                    "S3Bucket": { "Ref" : "S3BucketName" },
+                    "S3Key": { "Ref" : "S3KeyName" }
+                },
+                "Handler": "index.lambda_handler",
+                "Role": { "Fn::GetAtt" : ["ListEC2Role", "Arn"] },
+                "Timeout": "30",
+                "Runtime": "python3.6"
+            }
+        }
+    },
+    "Parameters" : {
+        "S3BucketName" : {
+            "Type" : "String"
+        },
+        "S3KeyName" : {
+            "Type" : "String"
+        }
+    }
+}
